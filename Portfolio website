@@ -1,0 +1,206 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Portfolio</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <header>
+        <h1>My Portfolio</h1>
+        <nav>
+            <ul>
+                <li><a href="#about">About</a></li>
+                <li><a href="#projects">Projects</a></li>
+                <li><a href="#contact">Contact</a></li>
+                <li><a href="#resume">Resume</a></li>
+            </ul>
+        </nav>
+    </header>
+
+    <section id="about">
+        <h2>About Me</h2>
+        <p>Hi, I'm [Your Name], a passionate software developer with expertise in web development, design, and programming.</p>
+    </section>
+
+    <section id="projects">
+        <h2>Projects</h2>
+        <div class="project">
+            <h3>Project 1</h3>
+            <p>Details about your first project.</p>
+        </div>
+        <div class="project">
+            <h3>Project 2</h3>
+            <p>Details about your second project.</p>
+        </div>
+    </section>
+
+    <section id="contact">
+        <h2>Contact Me</h2>
+        <form id="contactForm">
+            <label for="name">Name:</label>
+            <input type="text" id="name" name="name" required>
+
+            <label for="email">Email:</label>
+            <input type="email" id="email" name="email" required>
+
+            <label for="message">Message:</label>
+            <textarea id="message" name="message" required></textarea>
+
+            <button type="submit">Send</button>
+        </form>
+    </section>
+
+    <footer>
+        <p>&copy; 2024 [Your Name]</p>
+    </footer>
+
+    <script src="script.js"></script>
+</body>
+</html
+#css styling 
+body {
+    font-family: Arial, sans-serif;
+    margin: 0;
+    padding: 0;
+    background-color: #f4f4f4;
+}
+
+header {
+    background-color: #333;
+    color: white;
+    padding: 10px 0;
+    text-align: center;
+}
+
+nav ul {
+    list-style: none;
+    padding: 0;
+}
+
+nav ul li {
+    display: inline;
+    margin: 0 15px;
+}
+
+nav ul li a {
+    color: white;
+    text-decoration: none;
+}
+
+section {
+    padding: 20px;
+    margin: 20px;
+    background-color: white;
+    border-radius: 5px;
+}
+
+footer {
+    text-align: center;
+    background-color: #333;
+    color: white;
+    padding: 10px 0;
+    position: fixed;
+    width: 100%;
+    bottom: 0;
+}
+#javascript
+document.getElementById("contactForm").addEventListener("submit", function(event){
+    event.preventDefault();
+    alert("Message sent! Thank you for contacting.");
+});
+# server nodes js
+const express = require("express");
+const http = require("http");
+const WebSocket = require("ws");
+
+const app = express();
+const server = http.createServer(app);
+const wss = new WebSocket.Server({ server });
+
+let documentContent = "";
+
+wss.on("connection", (ws) => {
+    ws.send(JSON.stringify({ type: "init", content: documentContent }));
+
+    ws.on("message", (message) => {
+        const data = JSON.parse(message);
+        
+        if (data.type === "edit") {
+            documentContent = data.content;
+            wss.clients.forEach((client) => {
+                if (client !== ws && client.readyState === WebSocket.OPEN) {
+                    client.send(JSON.stringify({ type: "edit", content: documentContent }));
+                }
+            });
+        }
+    });
+});
+
+app.get("/", (req, res) => {
+    res.sendFile(__dirname + "/index.html");
+});
+
+server.listen(8080, () => {
+    console.log("Server running on http://localhost:8080");
+});
+#front js
+import React, { useEffect, useState } from "react";
+
+function CollaborativeEditor() {
+    const [content, setContent] = useState("");
+    const [socket, setSocket] = useState(null);
+
+    useEffect(() => {
+        const ws = new WebSocket("ws://localhost:8080");
+        setSocket(ws);
+
+        ws.onmessage = (message) => {
+            const data = JSON.parse(message.data);
+            if (data.type === "init") {
+                setContent(data.content);
+            } else if (data.type === "edit") {
+                setContent(data.content);
+            }
+        };
+
+        return () => ws.close();
+    }, []);
+
+    const handleChange = (e) => {
+        const updatedContent = e.target.value;
+        setContent(updatedContent);
+
+        if (socket) {
+            socket.send(JSON.stringify({ type: "edit", content: updatedContent }));
+        }
+    };
+
+    return (
+        <div>
+            <h1>Collaborative Editor</h1>
+            <textarea value={content} onChange={handleChange} rows="10" cols="50" />
+        </div>
+    );
+}
+
+export default CollaborativeEditor;
+#fronted ui
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Collaborative Editing Tool</title>
+</head>
+<body>
+    <div id="root"></div>
+
+    <script src="https://unpkg.com/react@17/umd/react.development.js"></script>
+    <script src="https://unpkg.com/react-dom@17/umd/react-dom.development.js"></script>
+    <script src="https://unpkg.com/babel-standalone@6/babel.min.js"></script>
+
+    <script type="text/babel" src="CollaborativeEditor.js"></script>
+</body>
+</html>
